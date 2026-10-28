@@ -1,0 +1,20 @@
+{
+  "name": "agent-evolution",
+  "version": "3.0.0",
+  "description": "Agent 行为固化与进化系统 v3.0：原子经验、置信度召回、审计与结晶",
+  "main": "scripts/evolution.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test scripts/*.test.js",
+    "init": "bash init.sh"
+  },
+  "keywords": ["agent", "evolution", "memory", "lessons", "recall", "tracking"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {}
+}
