@@ -1,0 +1,999 @@
+{
+  "version": "3.0",
+  "rules": {
+    "no-guess": {
+      "description": "禁止猜测",
+      "source": "AGENTS.md",
+      "weight": 0.48,
+      "executions": 1,
+      "violations": 1,
+      "createdAt": "2026-09-12T11:16:21.369Z",
+      "lastChecked": "2026-09-12T11:16:21.450Z",
+      "lastViolation": {
+        "context": "未读代码",
+        "timestamp": "2026-09-12T11:16:21.544Z"
+      }
+    }
+  },
+  "identity": {
+    "role": "planner",
+    "traits": [],
+    "version": 3,
+    "history": [
+      {
+        "change": "增加步骤",
+        "trigger": "反馈",
+        "timestamp": "2026-09-12T11:16:21.799Z",
+        "version": 3
+      }
+    ],
+    "updatedAt": "2026-09-12T11:16:21.799Z"
+  },
+  "patterns": {},
+  "logs": [
+    {
+      "timestamp": "2026-09-12T11:16:21.884Z",
+      "action_type": "edit",
+      "detail": "test",
+      "session_id": "a5e3b84e-7923-4fc8-9fbc-fc2fb9f11f27"
+    }
+  ],
+  "errors": {
+    "ERR-001": {
+      "title": "认证失败",
+      "root_cause": "token过期",
+      "solution": "验证token",
+      "prevention": "发布前检查",
+      "related": [],
+      "created_at": "2026-09-12T11:16:17.018Z",
+      "updated_at": "2026-09-12T11:16:17.018Z"
+    }
+  },
+  "insights": {
+    "INS-001": {
+      "problem": "GitHub发布失败",
+      "pattern": "认证模式",
+      "similar": [],
+      "solution": "多位置搜索",
+      "applications": [],
+      "created_at": "2026-09-12T11:16:17.098Z"
+    }
+  },
+  "lessons": {
+    "L-cli-boolean-flag": {
+      "trigger": "新增或修改 CLI 布尔开关时",
+      "action": "先确认 parseArgs 的 no- 前缀映射：--no-x 要读 flags.x === false，不要取 flags[\"no-x\"]",
+      "domain": "cli",
+      "confidence": 0.8,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "bootstrap --no-doctor 恒无效，被 review 抓到",
+          "at": "2026-10-27T11:30:48.174Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-27T11:30:48.174Z",
+      "updated_at": "2026-10-27T11:30:48.174Z",
+      "last_used": null
+    },
+    "L-raw-state-read": {
+      "trigger": "诊断或只读命令要读 state 时",
+      "action": "用 readRaw + migrate（纯内存），不要用 Storage.load()：它会补 config 抹平漂移，版本不符还会写 .bak",
+      "domain": "storage",
+      "confidence": 0.8,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "doctor 的 config_drift 只能从原始 JSON 看出",
+          "at": "2026-10-27T11:30:48.174Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-27T11:30:48.174Z",
+      "updated_at": "2026-10-27T11:30:48.174Z",
+      "last_used": null
+    },
+    "L-fix-preview": {
+      "trigger": "写带删除语义的 --fix 或 --apply 时",
+      "action": "先备份到带时间戳的文件，在克隆副本上预演，按身份集合比对确认无删除才落盘",
+      "domain": "data-safety",
+      "confidence": 0.75,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "save() 会跑 enforceLimits 静默裁剪",
+          "at": "2026-10-27T11:30:48.174Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-27T11:30:48.174Z",
+      "updated_at": "2026-10-27T11:30:48.174Z",
+      "last_used": null
+    },
+    "L-init-rules-dedup": {
+      "trigger": "markdown 抽取器有多个正则分支时",
+      "action": "去重不能只比精确文本，要加归一包含（长度比 >= 0.6），否则同一行会被多个分支各抽一次",
+      "domain": "parsing",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "rule-0 / rule-1 同源双抽",
+          "at": "2026-10-27T11:30:48.174Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-27T11:30:48.174Z",
+      "updated_at": "2026-10-27T11:30:48.174Z",
+      "last_used": null
+    },
+    "LESSON-counting-rule": {
+      "trigger": "跑批类评测要统计『条目数/带编号数』",
+      "action": "跑批前把计数口径（含标签与行内依据引用是否计入、附录是否独立成条）写进 plan 并以同一口径回读原文复核，避免事后改口径导致结论翻转",
+      "domain": "evaluation",
+      "confidence": 0.8,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "r3/r4 复核发现 3 处计数错，编号率 74%→78%、63%→59%",
+          "at": "2026-10-27T11:38:56.705Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-27T11:38:56.705Z",
+      "updated_at": "2026-10-27T11:38:56.705Z",
+      "last_used": null
+    },
+    "LESSON-closure-triage": {
+      "trigger": "任务收尾时还剩一批『可选』项",
+      "action": "按『是否改变任何已得结论』分档：只做能改变判定或防止未来误判的（如指纹闸），文档精修与补采样不做；把外部效度当作下一任务而非收尾项",
+      "domain": "workflow",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "review 基线课题收尾：5 项里只做 system 指纹，其余按此标准判定不做",
+          "at": "2026-10-27T11:56:16.191Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-27T11:56:16.191Z",
+      "updated_at": "2026-10-27T11:56:16.191Z",
+      "last_used": null
+    },
+    "L-1793103215160-2m09": {
+      "trigger": "bash 脚本报 unbound variable 且含中文标点",
+      "action": "检查 $var 后是否紧跟全角括号等字符，改用 ${var}；命令替换内不要用 case",
+      "domain": "workflow",
+      "confidence": 0.8,
+      "status": "active",
+      "scope": "project",
+      "evidence": [],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-27T12:13:35.161Z",
+      "updated_at": "2026-10-27T12:13:35.161Z",
+      "last_used": null
+    },
+    "L-1793103215160-8qqe": {
+      "trigger": "扫描类规则要匹配域名/关键词时",
+      "action": "扫描类规则匹配域名/关键词时必须加词边界（短域名不得命中框架配置文件名），awk 用 RSTART/RLENGTH 判前后字符",
+      "domain": "code",
+      "confidence": 0.8,
+      "status": "active",
+      "scope": "project",
+      "evidence": [],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-27T12:13:35.161Z",
+      "updated_at": "2026-10-27T12:23:06.223Z",
+      "last_used": null
+    },
+    "L-1793103215160-1zs6": {
+      "trigger": "扫描器性能退化（单文件数十秒）",
+      "action": "排查逐行 grep fork，改文件级 awk 一次扫描",
+      "domain": "code",
+      "confidence": 0.85,
+      "status": "active",
+      "scope": "project",
+      "evidence": [],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-27T12:13:35.161Z",
+      "updated_at": "2026-10-27T12:13:35.161Z",
+      "last_used": null
+    },
+    "L-1793103215160-ho0z": {
+      "trigger": "给扫描器/审计器写文档时",
+      "action": "不要在 SKILL.md 写会命中的字面量示例，改成不含完整 token 的表述",
+      "domain": "doc",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-27T12:13:35.161Z",
+      "updated_at": "2026-10-27T12:13:35.161Z",
+      "last_used": null
+    },
+    "L-TMP": {
+      "trigger": "扫描规则加降噪（去掉误报写法）之后",
+      "action": "用同文件能力共现（如已 require child_process）把被误伤的真阳性按关联补回 HIGH，并用『无前置声明』的反例锁住误报",
+      "domain": "code",
+      "confidence": 0.75,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "skill-auditor 去掉 .exec( 误报后 cp.exec 漏判，用文件级关联补回",
+          "at": "2026-10-27T13:53:28.038Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-27T13:53:28.038Z",
+      "updated_at": "2026-10-27T13:53:28.038Z",
+      "last_used": null
+    },
+    "L-1793156525446-0d8s": {
+      "trigger": "报「N 项待核」这类结论性数字前",
+      "action": "用 grep -c 实测，不靠上一轮摘要或记忆",
+      "domain": "general",
+      "confidence": 0.75,
+      "status": "active",
+      "scope": "project",
+      "evidence": [],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-28T03:02:05.446Z",
+      "updated_at": "2026-10-28T03:02:05.446Z",
+      "last_used": null
+    },
+    "L-1793156525446-c5hh": {
+      "trigger": "edit/shell 对目标目录持续 permission.rejected 时",
+      "action": "停手，把内容落成 docs/plan 补丁并明报 0 改动，等提权后一次落盘，不反复重试",
+      "domain": "general",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-28T03:02:05.446Z",
+      "updated_at": "2026-10-28T03:02:05.446Z",
+      "last_used": null
+    },
+    "L-1793169978096-7azg": {
+      "trigger": "改 skill 版本号时",
+      "action": "三载体同批改：frontmatter version + 首个 H1 的 Vx.y.z + 「- 版本：」行，并补历史条目；只改前两者会 rc=1「载体不一致」",
+      "domain": "general",
+      "confidence": 0.8,
+      "status": "active",
+      "scope": "project",
+      "evidence": [],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-28T06:46:18.098Z",
+      "updated_at": "2026-10-28T06:46:18.098Z",
+      "last_used": null
+    },
+    "L-1793169978096-mm9o": {
+      "trigger": "声称「门禁全绿」之前",
+      "action": "先看该组的天花板说明：pointer 在 2026-10-28 前不判路径存在，hygiene 的 os.walk 不跟软链——绿≠文件真实存在",
+      "domain": "general",
+      "confidence": 0.8,
+      "status": "active",
+      "scope": "project",
+      "evidence": [],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-28T06:46:18.098Z",
+      "updated_at": "2026-10-28T06:46:18.098Z",
+      "last_used": null
+    },
+    "L-1793169978096-y7n0": {
+      "trigger": "把本地技能目录改成仓库+软链前",
+      "action": "先 mv 内容 → ls -A 判空 → rmdir → ln -s；残留隐藏文件时 ln 会建到目录内部形成嵌套且门禁不报",
+      "domain": "general",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-28T06:46:18.098Z",
+      "updated_at": "2026-10-28T06:46:18.098Z",
+      "last_used": null
+    },
+    "L-1793169978096-us6j": {
+      "trigger": "公开仓库引用本机 ~/.config 路径时",
+      "action": "把降级策略上提到技能本体并标注「本机可选、不随仓发布」，不复制文件（避免双源漂移与反向依赖）",
+      "domain": "general",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-10-28T06:46:18.098Z",
+      "updated_at": "2026-10-28T06:46:18.098Z",
+      "last_used": null
+    },
+    "L-1794464668954-ys1v": {
+      "trigger": "编辑 opencode.jsonc 的 agent system 段落",
+      "action": "该字段是单行 JSON 字符串，不要在内部写未转义的双引号（用无引号形式），改完必跑 verify-env-guard.py --gate",
+      "domain": "general",
+      "confidence": 0.8,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "2026-11-12 两次踩 §5-1 解析失败（Expecting , delimiter）",
+          "at": "2026-11-12T06:24:28.955Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-11-12T06:24:28.955Z",
+      "updated_at": "2026-11-12T06:24:28.955Z",
+      "last_used": null
+    },
+    "L-1794464668954-3ktk": {
+      "trigger": "压缩超限 skill 正文（>500 行或需低于 400 预警线）",
+      "action": "先把整节细节搬到 references/ 留 1-2 行指针，再压缩示例与列表；不要调高 BODY_MAX",
+      "domain": "general",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "clean-code 503→398（305c8a3）、debug-loop 555→399（d7ae78c, df3621c）",
+          "at": "2026-11-12T06:24:28.955Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-11-12T06:24:28.955Z",
+      "updated_at": "2026-11-12T06:24:28.955Z",
+      "last_used": null
+    },
+    "L-1794464668954-x03s": {
+      "trigger": "在 ~/.config/opencode/skills/<x> 改完 skill",
+      "action": "先确认是否软链到 ~/Projects/<x>-skill 并到该仓库提交，否则改动看似丢失",
+      "domain": "general",
+      "confidence": 0.75,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "本轮 clean-code/debug-loop 均为软链，提交落在各自仓库",
+          "at": "2026-11-12T06:24:28.955Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-11-12T06:24:28.955Z",
+      "updated_at": "2026-11-12T06:24:28.955Z",
+      "last_used": null
+    },
+    "L-1794488021630-0g7k": {
+      "trigger": "用户报告某子代理调用不了",
+      "action": "先看 tool state 的 input.agent 与子会话 directory，区分模型拼错参数 / ext 拒绝 / shell 白名单，再决定是否改权限",
+      "domain": "workflow",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "Unknown agent: commit 是模型把 XML 拼进 agent 参数；另一例是 home 会话触发的 external_directory",
+          "at": "2026-11-12T12:53:41.637Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-11-12T12:53:41.637Z",
+      "updated_at": "2026-11-12T12:53:41.637Z",
+      "last_used": null
+    },
+    "L-1794488021630-4crk": {
+      "trigger": "子会话要操作父会话目录外的仓库",
+      "action": "查 external_directory 面，按单仓窄面登记 EXT_ALLOW_RESOURCES，不放开整卷",
+      "domain": "security",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "commit 在 /Users/lcr 会话下操作 /Volumes/KIOXIA/Code/see_pro 全部被 ext 拒",
+          "at": "2026-11-12T12:53:41.638Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-11-12T12:53:41.638Z",
+      "updated_at": "2026-11-12T12:53:41.638Z",
+      "last_used": null
+    },
+    "L-1794488021630-6ork": {
+      "trigger": "给子代理加 git 写权限前",
+      "action": "检查是否绕过既有 deny（git -C * add* 会绕过 git add . 的 deny），优先用 ext 窄面而不是 -C 系 allow",
+      "domain": "security",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "plan-review D-1：matcher 按字面前缀，git -C <repo> add . 不命中已有 deny",
+          "at": "2026-11-12T12:53:41.638Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-11-12T12:53:41.638Z",
+      "updated_at": "2026-11-12T12:53:41.638Z",
+      "last_used": null
+    },
+    "L-1794488021630-njjo": {
+      "trigger": "给子代理配权限时可联网工具未声明",
+      "action": "显式 deny webfetch/websearch（引擎默认 allow），否则读文件+网络=外联通道",
+      "domain": "security",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "commit 改前实测 webfetch example.com 成功；加 deny 后工具不可见",
+          "at": "2026-11-12T12:53:41.638Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-11-12T12:53:41.638Z",
+      "updated_at": "2026-11-12T12:53:41.638Z",
+      "last_used": null
+    },
+    "L-1794636303713-ea6a": {
+      "trigger": "统一两个入口的解析逻辑前",
+      "action": "先读两个实现并逐条对齐边界（单行无=、stdin、键空白、权限位），再抽单一实现并加离线断言锁旧用法",
+      "domain": "general",
+      "confidence": 0.8,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "driver stdin --key 被静默丢弃、单行原文仅 Python 侧支持",
+          "at": "2026-11-14T06:05:03.714Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-11-14T06:05:03.714Z",
+      "updated_at": "2026-11-14T06:05:03.714Z",
+      "last_used": null
+    },
+    "L-1794636303713-k5oc": {
+      "trigger": "skill 目录写权限被拒时",
+      "action": "先确认 skill 路径是否软链到 ~/Projects/<name>-skill，文档落该真实仓库 docs/",
+      "domain": "general",
+      "confidence": 0.7,
+      "status": "active",
+      "scope": "project",
+      "evidence": [
+        {
+          "type": "observation",
+          "note": "test_bg.sh 输出脚本真实路径 ~/Projects/debug-loop-skill",
+          "at": "2026-11-14T06:05:03.714Z"
+        }
+      ],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-11-14T06:05:03.714Z",
+      "updated_at": "2026-11-14T06:05:03.714Z",
+      "last_used": null
+    },
+    "L-1795071301463-pdyy": {
+      "trigger": "用 flutter build 增量构建 APK 后判断产物是否含本次改动",
+      "action": "不要看 mtime/大小（Gradle 复制保留旧时间戳），直接读 zip 内 assets/flutter_assets/kernel_blob.bin 搜本次新增字符串",
+      "domain": "general",
+      "confidence": 0.75,
+      "status": "active",
+      "scope": "project",
+      "evidence": [],
+      "helpful": 0,
+      "harmful": 0,
+      "created_at": "2026-11-19T06:55:01.463Z",
+      "updated_at": "2026-11-19T06:55:01.463Z",
+      "last_used": null
+    }
+  },
+  "events": [
+    {
+      "timestamp": "2026-10-27T11:00:06.761Z",
+      "op": "doctor-fix",
+      "target": null,
+      "summary": "backup=.opencode/agent-evolution/state.json.1793098806759.doctor.bak"
+    },
+    {
+      "timestamp": "2026-10-27T11:25:15.225Z",
+      "op": "rule-remove",
+      "target": "rule-1",
+      "summary": "与 rule-0 内容重复"
+    },
+    {
+      "timestamp": "2026-10-27T11:25:15.438Z",
+      "op": "prune",
+      "target": null,
+      "summary": "lessons:0 patterns:1"
+    },
+    {
+      "timestamp": "2026-10-27T11:30:48.174Z",
+      "op": "lesson-add",
+      "target": "L-cli-boolean-flag",
+      "summary": "新增或修改 CLI 布尔开关时 -> 先确认 parseArgs 的 no- 前缀映射：--no-x 要读 flags.x === false，不要取 flags[\"no-x\"]"
+    },
+    {
+      "timestamp": "2026-10-27T11:30:48.174Z",
+      "op": "lesson-add",
+      "target": "L-raw-state-read",
+      "summary": "诊断或只读命令要读 state 时 -> 用 readRaw + migrate（纯内存），不要用 Storage.load()：它会补 config 抹平漂移，版本不符还会写 .bak"
+    },
+    {
+      "timestamp": "2026-10-27T11:30:48.174Z",
+      "op": "lesson-add",
+      "target": "L-fix-preview",
+      "summary": "写带删除语义的 --fix 或 --apply 时 -> 先备份到带时间戳的文件，在克隆副本上预演，按身份集合比对确认无删除才落盘"
+    },
+    {
+      "timestamp": "2026-10-27T11:30:48.174Z",
+      "op": "lesson-add",
+      "target": "L-init-rules-dedup",
+      "summary": "markdown 抽取器有多个正则分支时 -> 去重不能只比精确文本，要加归一包含（长度比 >= 0.6），否则同一行会被多个分支各抽一次"
+    },
+    {
+      "timestamp": "2026-10-27T11:30:48.174Z",
+      "op": "wrap-up",
+      "target": "REV-1793100648173-f4bq",
+      "summary": "闭环落地：doctor / bootstrap / wrap-up / rule-remove / init-rules 去重"
+    },
+    {
+      "timestamp": "2026-10-27T11:36:05.209Z",
+      "op": "rule-remove",
+      "target": "rule-0",
+      "summary": "陈旧：来源文件不存在且与 AGENTS.md 重复"
+    },
+    {
+      "timestamp": "2026-10-27T11:36:05.349Z",
+      "op": "rule-remove",
+      "target": "rule-2",
+      "summary": "陈旧：来源文件不存在且与 AGENTS.md 重复"
+    },
+    {
+      "timestamp": "2026-10-27T11:36:05.500Z",
+      "op": "rule-remove",
+      "target": "rule-3",
+      "summary": "陈旧：来源文件不存在且与 AGENTS.md 重复"
+    },
+    {
+      "timestamp": "2026-10-27T11:36:05.644Z",
+      "op": "rule-remove",
+      "target": "rule-4",
+      "summary": "陈旧：来源文件不存在且与 AGENTS.md 重复"
+    },
+    {
+      "timestamp": "2026-10-27T11:38:53.187Z",
+      "op": "wrap-up",
+      "target": "REV-1793101133187-971p",
+      "summary": "review system 证据范围硬化与编号基线复测"
+    },
+    {
+      "timestamp": "2026-10-27T11:38:56.706Z",
+      "op": "lesson-add",
+      "target": "LESSON-counting-rule",
+      "summary": "跑批类评测要统计『条目数/带编号数』 -> 跑批前把计数口径（含标签与行内依据引用是否计入、附录是否独立成条）写进 plan 并以同一口径回读原文复核，避免事后改口径导致结论翻转"
+    },
+    {
+      "timestamp": "2026-10-27T11:56:16.192Z",
+      "op": "lesson-add",
+      "target": "LESSON-closure-triage",
+      "summary": "任务收尾时还剩一批『可选』项 -> 按『是否改变任何已得结论』分档：只做能改变判定或防止未来误判的（如指纹闸），文档精修与补采样不做；把外部效度当作下一任务而非收尾项"
+    },
+    {
+      "timestamp": "2026-10-27T12:13:35.162Z",
+      "op": "lesson-add",
+      "target": "L-1793103215160-2m09",
+      "summary": "bash 脚本报 unbound variable 且含中文标点 -> 检查 $var 后是否紧跟全角括号等字符，改用 ${var}；命令替换内不要用 case"
+    },
+    {
+      "timestamp": "2026-10-27T12:13:35.162Z",
+      "op": "lesson-add",
+      "target": "L-1793103215160-8qqe",
+      "summary": "扫描类规则要匹配域名/关键词时 -> 必须加词边界，否则 t.co 命中 next.config；awk 用 RSTART/RLENGTH 判前后字符"
+    },
+    {
+      "timestamp": "2026-10-27T12:13:35.162Z",
+      "op": "lesson-add",
+      "target": "L-1793103215160-1zs6",
+      "summary": "扫描器性能退化（单文件数十秒） -> 排查逐行 grep fork，改文件级 awk 一次扫描"
+    },
+    {
+      "timestamp": "2026-10-27T12:13:35.162Z",
+      "op": "lesson-add",
+      "target": "L-1793103215160-ho0z",
+      "summary": "给扫描器/审计器写文档时 -> 不要在 SKILL.md 写会命中的字面量示例，改成不含完整 token 的表述"
+    },
+    {
+      "timestamp": "2026-10-27T12:13:35.162Z",
+      "op": "wrap-up",
+      "target": "REV-1793103215160-copz",
+      "summary": "完善 skill-auditor v2 安全审计 skill"
+    },
+    {
+      "timestamp": "2026-10-27T12:23:06.224Z",
+      "op": "lesson-edit",
+      "target": "L-1793103215160-8qqe",
+      "summary": "action=扫描类规则匹配域名/关键词时必须加词边界（短域名不得命中框架配置文件名），awk 用 RSTART/RLENGTH 判前后字符"
+    },
+    {
+      "timestamp": "2026-10-27T13:53:28.039Z",
+      "op": "lesson-add",
+      "target": "L-TMP",
+      "summary": "扫描规则加降噪（去掉误报写法）之后 -> 用同文件能力共现（如已 require child_process）把被误伤的真阳性按关联补回 HIGH，并用『无前置声明』的反例锁住误报"
+    },
+    {
+      "timestamp": "2026-10-28T03:02:05.447Z",
+      "op": "lesson-add",
+      "target": "L-1793156525446-0d8s",
+      "summary": "报「N 项待核」这类结论性数字前 -> 用 grep -c 实测，不靠上一轮摘要或记忆"
+    },
+    {
+      "timestamp": "2026-10-28T03:02:05.447Z",
+      "op": "lesson-add",
+      "target": "L-1793156525446-c5hh",
+      "summary": "edit/shell 对目标目录持续 permission.rejected 时 -> 停手，把内容落成 docs/plan 补丁并明报 0 改动，等提权后一次落盘，不反复重试"
+    },
+    {
+      "timestamp": "2026-10-28T03:02:05.447Z",
+      "op": "wrap-up",
+      "target": "REV-1793156525446-bxcf",
+      "summary": "accessibility 1.3.0→1.3.1 上线自检节"
+    },
+    {
+      "timestamp": "2026-10-28T06:46:18.099Z",
+      "op": "lesson-add",
+      "target": "L-1793169978096-7azg",
+      "summary": "改 skill 版本号时 -> 三载体同批改：frontmatter version + 首个 H1 的 Vx.y.z + 「- 版本：」行，并补历史条目；只改前两者会 rc=1「载体不一致」"
+    },
+    {
+      "timestamp": "2026-10-28T06:46:18.099Z",
+      "op": "lesson-add",
+      "target": "L-1793169978096-mm9o",
+      "summary": "声称「门禁全绿」之前 -> 先看该组的天花板说明：pointer 在 2026-10-28 前不判路径存在，hygiene 的 os.walk 不跟软链——绿≠文件真实存在"
+    },
+    {
+      "timestamp": "2026-10-28T06:46:18.099Z",
+      "op": "lesson-add",
+      "target": "L-1793169978096-y7n0",
+      "summary": "把本地技能目录改成仓库+软链前 -> 先 mv 内容 → ls -A 判空 → rmdir → ln -s；残留隐藏文件时 ln 会建到目录内部形成嵌套且门禁不报"
+    },
+    {
+      "timestamp": "2026-10-28T06:46:18.099Z",
+      "op": "lesson-add",
+      "target": "L-1793169978096-us6j",
+      "summary": "公开仓库引用本机 ~/.config 路径时 -> 把降级策略上提到技能本体并标注「本机可选、不随仓发布」，不复制文件（避免双源漂移与反向依赖）"
+    },
+    {
+      "timestamp": "2026-10-28T06:46:18.099Z",
+      "op": "wrap-up",
+      "target": "REV-1793169978096-gy4f",
+      "summary": "技能仓库化批次：3 技能成库 + clean-code 解耦 + 门禁指针探针"
+    },
+    {
+      "timestamp": "2026-11-12T06:24:28.956Z",
+      "op": "lesson-add",
+      "target": "L-1794464668954-ys1v",
+      "summary": "编辑 opencode.jsonc 的 agent system 段落 -> 该字段是单行 JSON 字符串，不要在内部写未转义的双引号（用无引号形式），改完必跑 verify-env-guard.py --gate"
+    },
+    {
+      "timestamp": "2026-11-12T06:24:28.956Z",
+      "op": "lesson-add",
+      "target": "L-1794464668954-3ktk",
+      "summary": "压缩超限 skill 正文（>500 行或需低于 400 预警线） -> 先把整节细节搬到 references/ 留 1-2 行指针，再压缩示例与列表；不要调高 BODY_MAX"
+    },
+    {
+      "timestamp": "2026-11-12T06:24:28.956Z",
+      "op": "lesson-add",
+      "target": "L-1794464668954-x03s",
+      "summary": "在 ~/.config/opencode/skills/<x> 改完 skill -> 先确认是否软链到 ~/Projects/<x>-skill 并到该仓库提交，否则改动看似丢失"
+    },
+    {
+      "timestamp": "2026-11-12T06:24:28.956Z",
+      "op": "wrap-up",
+      "target": "REV-1794464668954-i0z0",
+      "summary": "全局配置与技能库维护（Cursor skill 移植 + 超限瘦身）"
+    },
+    {
+      "timestamp": "2026-11-12T12:53:41.642Z",
+      "op": "lesson-add",
+      "target": "L-1794488021630-0g7k",
+      "summary": "用户报告某子代理调用不了 -> 先看 tool state 的 input.agent 与子会话 directory，区分模型拼错参数 / ext 拒绝 / shell 白名单，再决定是否改权限"
+    },
+    {
+      "timestamp": "2026-11-12T12:53:41.642Z",
+      "op": "lesson-add",
+      "target": "L-1794488021630-4crk",
+      "summary": "子会话要操作父会话目录外的仓库 -> 查 external_directory 面，按单仓窄面登记 EXT_ALLOW_RESOURCES，不放开整卷"
+    },
+    {
+      "timestamp": "2026-11-12T12:53:41.642Z",
+      "op": "lesson-add",
+      "target": "L-1794488021630-6ork",
+      "summary": "给子代理加 git 写权限前 -> 检查是否绕过既有 deny（git -C * add* 会绕过 git add . 的 deny），优先用 ext 窄面而不是 -C 系 allow"
+    },
+    {
+      "timestamp": "2026-11-12T12:53:41.642Z",
+      "op": "lesson-add",
+      "target": "L-1794488021630-njjo",
+      "summary": "给子代理配权限时可联网工具未声明 -> 显式 deny webfetch/websearch（引擎默认 allow），否则读文件+网络=外联通道"
+    },
+    {
+      "timestamp": "2026-11-12T12:53:41.642Z",
+      "op": "wrap-up",
+      "target": "REV-1794488021630-iw0t",
+      "summary": "定位并修复 commit 子代理调用失败（权限收口）"
+    },
+    {
+      "timestamp": "2026-11-14T06:05:03.715Z",
+      "op": "lesson-add",
+      "target": "L-1794636303713-ea6a",
+      "summary": "统一两个入口的解析逻辑前 -> 先读两个实现并逐条对齐边界（单行无=、stdin、键空白、权限位），再抽单一实现并加离线断言锁旧用法"
+    },
+    {
+      "timestamp": "2026-11-14T06:05:03.715Z",
+      "op": "lesson-add",
+      "target": "L-1794636303713-k5oc",
+      "summary": "skill 目录写权限被拒时 -> 先确认 skill 路径是否软链到 ~/Projects/<name>-skill，文档落该真实仓库 docs/"
+    },
+    {
+      "timestamp": "2026-11-14T06:05:03.715Z",
+      "op": "wrap-up",
+      "target": "REV-1794636303713-bzve",
+      "summary": "debug-loop 支持多测试账号"
+    },
+    {
+      "timestamp": "2026-11-19T06:55:01.464Z",
+      "op": "lesson-add",
+      "target": "L-1795071301463-pdyy",
+      "summary": "用 flutter build 增量构建 APK 后判断产物是否含本次改动 -> 不要看 mtime/大小（Gradle 复制保留旧时间戳），直接读 zip 内 assets/flutter_assets/kernel_blob.bin 搜本次新增字符串"
+    },
+    {
+      "timestamp": "2026-11-19T06:55:01.464Z",
+      "op": "wrap-up",
+      "target": "REV-1795071301463-arut",
+      "summary": "修复分享设备页已接收Tab空态文案错用"
+    }
+  ],
+  "assessments": {
+    "updated_at": "2026-09-12T11:16:17.198Z",
+    "code_quality": 4,
+    "architecture": 4,
+    "performance": 4,
+    "error_prevention": 4
+  },
+  "reviews": [
+    {
+      "id": "REV-1789211777272-zae7",
+      "task": "实现登录",
+      "completion": 90,
+      "highlights": [
+        "核心完成",
+        "测试通过"
+      ],
+      "improvements": [
+        "需加错误处理"
+      ],
+      "learnings": [],
+      "error_ids": [],
+      "insight_ids": [],
+      "created_at": "2026-09-12T11:16:17.271Z"
+    },
+    {
+      "id": "REV-1793100648173-f4bq",
+      "task": "闭环落地：doctor / bootstrap / wrap-up / rule-remove / init-rules 去重",
+      "completion": 95,
+      "highlights": [
+        "doctor 体检 + --fix 预演",
+        "bootstrap 只读入口",
+        "wrap-up 单事务",
+        "init-rules 双键去重"
+      ],
+      "improvements": [
+        "方案 5 个 P1 已修订",
+        "复审后补元素级守卫"
+      ],
+      "learnings": [],
+      "error_ids": [],
+      "insight_ids": [],
+      "created_at": "2026-10-27T11:30:48.173Z"
+    },
+    {
+      "id": "REV-1793101133187-971p",
+      "task": "review system 证据范围硬化与编号基线复测",
+      "completion": 100,
+      "highlights": [
+        "事实性错误 1→0；检出 12/13；待核实单份≤3 且独立成段"
+      ],
+      "improvements": [
+        "计数口径须在跑批前固化；规则文件 mtime 同源性检查应前置"
+      ],
+      "learnings": [],
+      "error_ids": [],
+      "insight_ids": [],
+      "created_at": "2026-10-27T11:38:53.187Z"
+    },
+    {
+      "id": "REV-1793103215160-copz",
+      "task": "完善 skill-auditor v2 安全审计 skill",
+      "completion": 95,
+      "highlights": [
+        "分层检测+降噪+性能+CI 能力落地"
+      ],
+      "improvements": [
+        "别名子进程调用无机数据流分析；规模化性能待优化"
+      ],
+      "learnings": [],
+      "error_ids": [],
+      "insight_ids": [],
+      "created_at": "2026-10-27T12:13:35.160Z"
+    },
+    {
+      "id": "REV-1793156525446-bxcf",
+      "task": "accessibility 1.3.0→1.3.1 上线自检节",
+      "completion": 95,
+      "highlights": [
+        "9 项营养标签全核+门禁全绿+快照留档"
+      ],
+      "improvements": [
+        "锚重锚/步骤3分流句挂触发条件"
+      ],
+      "learnings": [],
+      "error_ids": [],
+      "insight_ids": [],
+      "created_at": "2026-10-28T03:02:05.446Z"
+    },
+    {
+      "id": "REV-1793169978096-gy4f",
+      "task": "技能仓库化批次：3 技能成库 + clean-code 解耦 + 门禁指针探针",
+      "completion": 100,
+      "highlights": [
+        "app-design/frontend-design/product-manager 三仓 public 发布并软链挂载；P0 断链修复（路径扫描 2 MISS → 0）；门禁三连全绿且扫描面恒 68；pointer 判据 B 探针上线（仅 info，selftest +4）"
+      ],
+      "improvements": [
+        "hygiene 不跟软链仍未修（当前 0 个 .bak，暂不动）；accessibility 锚 v2.4.15 留季审；product-prototype 有他会话未提交改动未触碰"
+      ],
+      "learnings": [],
+      "error_ids": [],
+      "insight_ids": [],
+      "created_at": "2026-10-28T06:46:18.096Z"
+    },
+    {
+      "id": "REV-1794464668954-i0z0",
+      "task": "全局配置与技能库维护（Cursor skill 移植 + 超限瘦身）",
+      "completion": 95,
+      "highlights": [
+        "loop 移植落地并实测；三项合并落地；两 skill 压到 398/399 行，WARN 0、门禁 rc=0"
+      ],
+      "improvements": [
+        "全局配置改动仍无回滚快照；两 skill 余量仅 1~2 行"
+      ],
+      "learnings": [],
+      "error_ids": [],
+      "insight_ids": [],
+      "created_at": "2026-11-12T06:24:28.954Z"
+    },
+    {
+      "id": "REV-1794488021630-iw0t",
+      "task": "定位并修复 commit 子代理调用失败（权限收口）",
+      "completion": 95,
+      "highlights": [
+        "确认调用层正常；根因是子会话 external_directory（父会话 home）与 shell 命令形态；落地 webfetch/websearch deny + see_pro 窄 ext + system 去 $() + external_directory 早退；gate rc=0，探针四项符合预期"
+      ],
+      "improvements": [
+        "其他子代理默认外联未收口；commit 的 git branch -D 风险；其余仓库从 home 提交仍需逐仓登记 ext"
+      ],
+      "learnings": [],
+      "error_ids": [],
+      "insight_ids": [],
+      "created_at": "2026-11-12T12:53:41.630Z"
+    },
+    {
+      "id": "REV-1794636303713-bzve",
+      "task": "debug-loop 支持多测试账号",
+      "completion": 95,
+      "highlights": [
+        "凭据解析统一到 _secret.py（扁平+[acct:组名]）；input.sh/driver.py 新增 --account；两轮审查闭环；测试 184 项；提交 fa158a0 + d3946b6"
+      ],
+      "improvements": [
+        "真机登录闭环未做（本机无带登录页的工程）；stdin 与 --key 语义分叉靠新增守卫缓解"
+      ],
+      "learnings": [],
+      "error_ids": [],
+      "insight_ids": [],
+      "created_at": "2026-11-14T06:05:03.713Z"
+    },
+    {
+      "id": "REV-1795071301463-arut",
+      "task": "修复分享设备页已接收Tab空态文案错用",
+      "completion": 95,
+      "highlights": [
+        "l10n新增receivedShareListEmpty(6语)+页面改用+补Widget用例；analyze 0 error、15 tests passed、真机4/4+2/2断言PASS；两仓库已提交b9edfdf/dc7464c；固化A级流程share-empty-copy"
+      ],
+      "improvements": [
+        "中文文案末行孤字待设计确认；已分享/已接收其他文案未逐一复核；SharedDeviceListPage空态无用例"
+      ],
+      "learnings": [],
+      "error_ids": [],
+      "insight_ids": [],
+      "created_at": "2026-11-19T06:55:01.463Z"
+    }
+  ],
+  "config": {
+    "thresholds": {
+      "repeatCount": 5,
+      "repeatWindowMinutes": 10,
+      "driftMatchScore": 0.3
+    },
+    "limits": {
+      "maxLogs": 1000,
+      "maxErrors": 500,
+      "maxInsights": 500,
+      "maxReviews": 200,
+      "maxLessons": 500,
+      "maxEvents": 1000
+    },
+    "recall": {
+      "defaultLimit": 8,
+      "minConfidence": 0.5,
+      "rulesLimit": 5
+    },
+    "lifecycle": {
+      "activateConfidence": 0.6,
+      "retireConfidence": 0.2,
+      "maxConfidence": 0.95,
+      "halfLifeDays": 30,
+      "maxEvidence": 20,
+      "globalMinConfidence": 0.8
+    },
+    "privacy": {
+      "redactLogs": true
+    }
+  }
+}
